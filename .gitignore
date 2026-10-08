@@ -1,0 +1,10 @@
+# Raw and derived data (dataset licence: CC BY-NC-ND 4.0 - downloaded on first run)
+data/raw/
+data/processed/
+
+# Environment
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
