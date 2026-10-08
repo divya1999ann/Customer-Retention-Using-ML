@@ -394,6 +394,7 @@ def uplift_by_group(score, y, t, n_groups: int = 10, w=None) -> pd.DataFrame:
         n1, n0 = int(t[m].sum()), int((1 - t[m]).sum())
         se = np.sqrt(p1 * (1 - p1) / n1 + p0 * (1 - p0) / n0)
         rows.append({"group": g, "n": int(m.sum()), "n_treated": n1, "n_control": n0,
+                     "control_churners": int(y[m][t[m] == 0].sum()),
                      "churn_treated": p1, "churn_control": p0,
                      "observed_reduction": p0 - p1, "se": se,
                      "mean_score": np.asarray(score)[m].mean()})
