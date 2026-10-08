@@ -262,18 +262,26 @@ def _folds(X, t, y, n_splits, seed):
     return StratifiedKFold(n_splits, shuffle=True, random_state=seed).split(X, strata)
 
 
-def s_learner(make_model, X, t, y, n_splits: int = 5, seed: int = 0):
+def s_learner(make_model, X, t, y, n_splits: int = 5, seed: int = 0,
+              interactions: bool = False):
     """S-learner: one model y ~ f(X, t); CATE = f(x, 1) - f(x, 0).
 
+    ``interactions=True`` appends t * X columns. A linear model needs them to
+    express effects that vary with X; tree models can find interactions themselves.
     Returns out-of-fold arrays (mu0, mu1, cate) where cate is on the churn scale
     (negative = treatment lowers churn).
     """
     X, t, y = np.asarray(X, dtype=float), np.asarray(t), np.asarray(y)
+
+    def design(Xp, tp):
+        cols = [Xp, tp[:, None]] + ([Xp * tp[:, None]] if interactions else [])
+        return np.hstack(cols)
+
     mu0, mu1 = np.empty(len(y)), np.empty(len(y))
     for tr, te in _folds(X, t, y, n_splits, seed):
-        m = make_model().fit(np.column_stack([X[tr], t[tr]]), y[tr])
-        mu0[te] = m.predict_proba(np.column_stack([X[te], np.zeros(len(te))]))[:, 1]
-        mu1[te] = m.predict_proba(np.column_stack([X[te], np.ones(len(te))]))[:, 1]
+        m = make_model().fit(design(X[tr], t[tr].astype(float)), y[tr])
+        mu0[te] = m.predict_proba(design(X[te], np.zeros(len(te))))[:, 1]
+        mu1[te] = m.predict_proba(design(X[te], np.ones(len(te))))[:, 1]
     return mu0, mu1, mu1 - mu0
 
 
