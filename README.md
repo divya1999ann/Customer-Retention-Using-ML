@@ -6,7 +6,6 @@ Python · statistics · causal inference · econometrics · machine learning · 
 
 ---
 
-## TL;DR
 
 | Question | Finding |
 |---|---|
